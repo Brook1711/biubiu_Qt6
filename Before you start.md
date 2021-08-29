@@ -1,9 +1,4 @@
-# biubiu_Qt6
-biubiu project by Qt6
-
-终于，向浏览器恶势力低头了
-
-QT官网教程解读 [官网链接](https://doc.qt.io/qtforpython-6/tutorials/index.html#before-you-start)
+https://doc.qt.io/qtforpython-6/tutorials/index.html#before-you-start)
 
 # Before you start
 
@@ -71,19 +66,19 @@ pyside6-rcc -i resources.qrc -o rc_resources.py
 
 ### Vscode 安装插件
 
-![image-20210828105948473](README.assets/image-20210828105948473.png)
+![image-20210828105948473](Before you start.assets/image-20210828105948473.png)
 
-# Binding Generation: What Is Shiboken?
+## Binding Generation: What Is Shiboken?
 
 在安装PySide6（PyQt的python包名称）时，会自动安装Shiboken6
 
-![image-20210828110411755](README.assets/image-20210828110411755.png)
+![image-20210828110411755](Before you start.assets/image-20210828110411755.png)
 
 要注意要使用转译功能需要再安装一个包：`Shiboken Generator`
 
 如果只是要使用PyQt创建新的应用，则不需要安装**Shiboken Generator**
 
-# File Types
+## File Types
 
 在开发PyQt应用时要使用到不同类型的文件：`.ui`	`.qrc`	`.qml` `.py`等
 
