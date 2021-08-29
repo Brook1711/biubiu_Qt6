@@ -13,3 +13,13 @@ vlc 源码：[Index of /pub/videolan/vlc/last/win64/](http://download.videolan.o
 
 exe打包二进制：pyinstaller
 
+Pyinstaller -F -i 1.ico tkvlc.py
+
+
+
+Mac:py2app
+
+py2applet --make-setup tkvlc_mac.py
+
+python3 setup.py py2app -A
+
