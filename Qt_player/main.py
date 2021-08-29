@@ -1,13 +1,13 @@
 """PySide6 Multimedia player example"""
 
 import sys
-from PySide6.QtCore import QStandardPaths, Qt, Slot
-from PySide6.QtGui import QAction, QIcon, QKeySequence, QScreen
-from PySide6.QtWidgets import (QApplication, QDialog, QFileDialog,
+from PySide2.QtCore import QStandardPaths, Qt, Slot
+from PySide2.QtGui import QAction, QIcon, QKeySequence, QScreen
+from PySide2.QtWidgets import (QApplication, QDialog, QFileDialog,
     QMainWindow, QSlider, QStyle, QToolBar)
-from PySide6.QtMultimedia import (QAudio, QAudioOutput, QMediaFormat,
+from PySide2.QtMultimedia import (QAudio, QAudioOutput, QMediaFormat,
                                   QMediaPlayer)
-from PySide6.QtMultimediaWidgets import QVideoWidget
+from PySide2.QtMultimediaWidgets import QVideoWidget
 
 
 AVI = "video/x-msvideo"  # AVI
