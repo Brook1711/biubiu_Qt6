@@ -244,3 +244,311 @@ if __name__ == '__main__':
 
 ## Displaying Data Using a Table Widget
 
+如果想用表格展示数据的话，可以使用`QTableWidget`模块。
+
+`QTableWidget`只是展示表格的其中一种方式，也可以使用`QTableView`
+
+> 需要注意的是，本教程只是python入门教程，但是python只是提供一个接入Qt库的api，Qt模组的详细介绍在[Qt Widgets 6.1.2](https://doc.qt.io/qt-6/qtwidgets-index.html)
+>
+> <img src="Qt Widgets: Basic tutorials.assets/image-20210829115246664.png" alt="image-20210829115246664" style="zoom:50%;" />
+
+1. 引入库
+```python
+mport sys
+from PySide6.QtGui import QColor
+from PySide6.QtWidgets import (QApplication, QTableWidget,
+                               QTableWidgetItem)
+```
+2. 创建数据索引和内容
+```python
+colors = [("Red", "#FF0000"),
+          ("Green", "#00FF00"),
+          ("Blue", "#0000FF"),
+          ("Black", "#000000"),
+          ("White", "#FFFFFF"),
+          ("Electric Green", "#41CD52"),
+          ("Dark Blue", "#222840"),
+          ("Yellow", "#F9E56d")]
+```
+3. 转换颜色数据格式
+```python
+def get_rgb_from_hex(code):
+    code_hex = code.replace("#", "")
+    rgb = tuple(int(code_hex[i:i+2], 16) for i in (0, 2, 4))
+    return QColor.fromRgb(rgb[0], rgb[1], rgb[2])
+```
+4. 初始化Qt应用
+```python
+app = QApplication()
+```
+5. 初始化表格组件
+```python
+table = QTableWidget()
+table.setRowCount(len(colors))
+table.setColumnCount(len(colors[0]) + 1)
+table.setHorizontalHeaderLabels(["Name", "Hex Code", "Color"])
+```
+6. 设置循环来编辑表格内容
+```python
+for i, (name, code) in enumerate(colors):
+    item_name = QTableWidgetItem(name)
+    item_code = QTableWidgetItem(code)
+    item_color = QTableWidgetItem()
+    item_color.setBackground(get_rgb_from_hex(code))
+    table.setItem(i, 0, item_name)
+    table.setItem(i, 1, item_code)
+    table.setItem(i, 2, item_color)
+```
+7. 将组件可视化并执行主程序
+
+```python
+table.show()
+sys.exit(app.exec())
+```
+
+## Displaying Data Using a Tree Widget
+
+略
+
+## 安装和使用Qt designer
+
+[PyQt6 Qt Designer安装启动/打开 - 弟球嗑学 (geocalculate.com)](https://www.geocalculate.com/7495.html)
+
+```bash
+pip install pyqt6-tools
+```
+
+
+
+默认情况下，PyQt5或PyQt6不会默认安装**Qt Designer**, 我们需要额外安装一个包，叫做**pyqt5-tools**。虽然看名称显然是为PyQt5设计的，不过不用担心，PyQt6同样可以使用。
+
+## Using .ui files from Designer or QtCreator with QUiLoader and pyside6-uic
+
+`.ui`文件定义了GUI布局，该文件可以用两种方式生成：
+
+1. 独立工具`pyside6-designer`（推荐）
+
+2. 下载完整版`Qt Creator`
+
+启动Qt designer 在mac上可以用：
+
+```
+open -a Designer
+```
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <widget class="QPushButton" name="pushButton">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>80</y>
+      <width>201</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PushButton</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>400</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>
+```
+
+### Option A: Generating a Python class
+
+为了编辑`.ui`文件，可以通过将`.ui`文件转译为python文件：
+
+```python
+pyside6-uic mainwindow.ui > ui_mainwindow.py
+
+```
+
+为了将生成的python布局文件和python代码绑定：
+
+```python
+import sys
+from PySide6.QtWidgets import QApplication, QMainWindow
+from PySide6.QtCore import QFile
+from ui_mainwindow import Ui_MainWindow
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super(MainWindow, self).__init__()
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+
+    window = MainWindow()
+    window.show()
+
+    sys.exit(app.exec())
+```
+
+其中以下两句是绑定的关键：
+
+```
+self.ui = Ui_MainWindow()
+self.ui.setupUi(self)
+```
+
+`Ui_MainWindow`是之前自动生成的python代码中定义的布局
+
+### Option B: Loading it directly
+
+很显然，另一种方式就是不改变文件的后缀，通过`QUiLoader`
+
+之间将布局文件引入：
+
+```python
+from PySide6.QtUiTools import QUiLoader
+
+```
+
+则ui文件被引入的语句为：
+
+```python
+ui_file = QFile("mainwindow.ui")
+ui_file.open(QFile.ReadOnly)
+
+loader = QUiLoader()
+window = loader.load(ui_file)
+window.show()
+```
+
+以上过程的完整代码为：
+
+```python
+# File: main.py
+import sys
+from PySide6.QtUiTools import QUiLoader
+from PySide6.QtWidgets import QApplication
+from PySide6.QtCore import QFile, QIODevice
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+
+    ui_file_name = "mainwindow.ui"
+    ui_file = QFile(ui_file_name)
+    if not ui_file.open(QIODevice.ReadOnly):
+        print(f"Cannot open {ui_file_name}: {ui_file.errorString()}")
+        sys.exit(-1)
+    loader = QUiLoader()
+    window = loader.load(ui_file)
+    ui_file.close()
+    if not window:
+        print(loader.errorString())
+        sys.exit(-1)
+    window.show()
+
+    sys.exit(app.exec())
+```
+
+### Custom Widgets in Qt Designer
+
+在Qt Designer软件中支持引入第三方小组件，但是只允许使用C++编写的组件。
+
+pyQt提供了一种简单的自定义第三方小组件的方法，可以直接以python类的形式编写：
+
+`registerCustomWidget()`
+
+```python
+# File: registerwigglywidget.py
+from wigglywidget import WigglyWidget
+import QtDesigner
+
+
+TOOLTIP = "A cool wiggly widget (Python)"
+DOM_XML = """
+<ui language='c++'>
+    <widget class='WigglyWidget' name='wigglyWidget'>
+        <property name='geometry'>
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>400</width>
+                <height>200</height>
+            </rect>
+        </property>
+        <property name='text'>
+            <string>Hello, world</string>
+        </property>
+    </widget>
+</ui>
+"""
+
+QPyDesignerCustomWidgetCollection.registerCustomWidget(WigglyWidget, module="wigglywidget",
+                                                       tool_tip=TOOLTIP, xml=DOM_XML)
+```
+
+### Using .qrc Files (pyside6-rcc)
+
+> The [Qt Resource System](https://doc.qt.io/qt-5/resources.html) is a mechanism for storing binary files in an application.
+
+在`.qrc`中列出的资源在打包时会一并被嵌入到二进制执行文件中。`QFile`, `QIcon`, `Qpixmap`通过特殊字符`:/`来识别指定资源。
+
+在本节中，会以一个多媒体播放器为例
+
+![image-20210829182227579](Qt Widgets: Basic tutorials.assets/image-20210829182227579.png)
+
+可以看到，该播放器的按钮都是默认的图标。接下来我们将图标替换为以下的图片：
+
+<img src="Qt Widgets: Basic tutorials.assets/image-20210829182403224.png" alt="image-20210829182403224" style="zoom:50%;" />
+
+### The .qrc file
+
+首先介绍`.qrc`文件，以下是名为`icons.qrc`的实例：
+
+```xml
+</ui>
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>icons/play.png</file>
+    <file>icons/pause.png</file>
+    <file>icons/stop.png</file>
+    <file>icons/previous.png</file>
+    <file>icons/forward.png</file>
+</qresource>
+</RCC>
+```
+
