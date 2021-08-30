@@ -23,3 +23,14 @@ py2applet --make-setup tkvlc_mac.py
 
 python3 setup.py py2app -A
 
+## 基于vlc
+
+运行时保证vlc库与可执行文件位于同一个目录下
+
+![image-20210830130140110](README.assets/image-20210830130140110.png)
+
+## Qt窗口类型
+https://www.cnblogs.com/laizhenghong2012/p/10085089.html
+
+![image-20210830121834596](README.assets/image-20210830121834596.png)
+
