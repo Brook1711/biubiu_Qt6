@@ -23,6 +23,14 @@ py2applet --make-setup tkvlc_mac.py
 
 python3 setup.py py2app -A
 
+## 结构规划
+
+![image-20210830131306464](README.assets/image-20210830131306464.png)
+
+评论和弹幕出现之前：
+
+![image-20210830132434263](README.assets/image-20210830132434263.png)
+
 ## 基于vlc
 
 运行时保证vlc库与可执行文件位于同一个目录下
