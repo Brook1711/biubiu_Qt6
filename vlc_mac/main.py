@@ -24,11 +24,15 @@ import os.path, os
 # os.environ['PYTHON_VLC_MODULE_PATH'] = "./vlc-3.0.16"
 
 import vlc
-from PySide6 import QtGui, QtCore
-from PySide6.QtCore import Slot
-from PySide6.QtGui import QAction
+# import vlc
+from PyQt5 import QtGui, QtCore
+from PySide2.QtCore import Slot
+from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QFrame, QSlider, QHBoxLayout, QPushButton, QVBoxLayout, QAction, QFileDialog, QMacCocoaViewContainer
+# from PySide6 import QtGui, QtCore
+# from PySide6.QtCore import Slot
+# from PySide6.QtGui import QAction
 
-from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QFrame, QSlider, QHBoxLayout, QPushButton, QVBoxLayout, QFileDialog
+# from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QFrame, QSlider, QHBoxLayout, QPushButton, QVBoxLayout, QFileDialog
 
 try:
     unicode        # Python 2
@@ -59,8 +63,8 @@ class Player(QMainWindow):
 
         # In this widget, the video will be drawn
         if sys.platform == "darwin": # for MacOS
-            # self.videoframe = QtGui.QMacCocoaViewContainer(0)
-            self.videoframe = QFrame()
+            self.videoframe = QMacCocoaViewContainer(0)
+            # self.videoframe = QFrame()
         else:
             self.videoframe = QFrame()
         self.palette = self.videoframe.palette()
@@ -177,7 +181,7 @@ class Player(QMainWindow):
         elif sys.platform == "win32": # for Windows
             self.mediaplayer.set_hwnd(self.videoframe.winId())
         elif sys.platform == "darwin": # for MacOS
-            self.mediaplayer.set_nsobject(self.videoframe.winId())
+            self.mediaplayer.set_nsobject(int(self.videoframe.winId()))
         self.PlayPause()
     @Slot()
     def setVolume(self, Volume):
@@ -217,4 +221,4 @@ if __name__ == "__main__":
     player.resize(640, 480)
     if sys.argv[1:]:
         player.OpenFile(sys.argv[1])
-    sys.exit(app.exec())
+    sys.exit(app.exec_())
