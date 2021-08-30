@@ -7,10 +7,9 @@ Usage:
 
 from setuptools import setup
 
-APP = ['tkvlc_mac.py']
+APP = ['main.py']
 DATA_FILES = []
-OPTIONS = {}
-
+OPTIONS = {'includes': ['sys','os.path','os','vlc','PySide6.QtGui','PySide6.QtCore','PySide6.QtCore.Slot','PySide6.QtGui.QAction','PySide6.QtWidgets.QMainWindow','PySide6.QtWidgets.QApplication','PySide6.QtWidgets.QWidget','PySide6.QtWidgets.QFrame','PySide6.QtWidgets.QSlider','PySide6.QtWidgets.QHBoxLayout','PySide6.QtWidgets.QPushButton','PySide6.QtWidgets.QVBoxLayout','PySide6.QtWidgets.QFileDialog']}
 setup(
     app=APP,
     data_files=DATA_FILES,

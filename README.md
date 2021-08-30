@@ -19,9 +19,15 @@ Pyinstaller -F -i 1.ico qt_vlc.py
 
 Mac:py2app
 
-py2applet --make-setup tkvlc_mac.py
+py2applet --make-setup main.py
 
 python3 setup.py py2app -A
+
+
+pyinstaller --windowed --onefile --clean --noconfirm main.py
+pyinstaller --clean --noconfirm --windowed --onefile main.spec
+
+pip install cx_Freeze
 
 ## 结构规划
 
