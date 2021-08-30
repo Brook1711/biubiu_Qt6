@@ -24,9 +24,11 @@ import os.path, os
 os.environ['PYTHON_VLC_MODULE_PATH'] = "./vlc-3.0.16"
 
 import vlc
-from PyQt5 import QtGui, QtCore
-from PySide2.QtCore import Slot
-from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QFrame, QSlider, QHBoxLayout, QPushButton, QVBoxLayout, QAction, QFileDialog
+from PySide6 import QtGui, QtCore
+from PySide6.QtCore import Slot
+from PySide6.QtGui import QAction
+
+from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QFrame, QSlider, QHBoxLayout, QPushButton, QVBoxLayout, QFileDialog
 
 try:
     unicode        # Python 2
