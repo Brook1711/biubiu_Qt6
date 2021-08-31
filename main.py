@@ -20,8 +20,8 @@
 #
 import sys
 import os.path, os
-
-os.environ['PYTHON_VLC_MODULE_PATH'] = "./vlc-3.0.16"
+if sys.platform == "win32": 
+    os.environ['PYTHON_VLC_MODULE_PATH'] = "./vlc-3.0.16"
 
 import vlc
 from PySide6 import QtGui, QtCore
@@ -59,7 +59,8 @@ class Player(QMainWindow):
 
         # In this widget, the video will be drawn
         if sys.platform == "darwin": # for MacOS
-            self.videoframe = QtGui.QMacCocoaViewContainer(0)
+            # self.videoframe = QtGui.QMacCocoaViewContainer(0)
+            self.videoframe = QFrame()
         else:
             self.videoframe = QFrame()
         self.palette = self.videoframe.palette()

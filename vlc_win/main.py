@@ -1,126 +1,220 @@
-import os, time
+#! /usr/bin/python
 
-# 设置VLC库路径，需在import vlc之前
-os.environ['PYTHON_VLC_MODULE_PATH'] = "D:\\New FOLDER\\vlc-3.0.16"
+#
+# Qt example for VLC Python bindings
+# Copyright (C) 2009-2010 the VideoLAN team
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
+#
+import sys
+import os.path, os
+if sys.platform == "win32": 
+    os.environ['PYTHON_VLC_MODULE_PATH'] = "./vlc-3.0.16"
 
 import vlc
+from PySide6 import QtGui, QtCore
+from PySide6.QtCore import Slot
+from PySide6.QtGui import QAction
+
+from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QFrame, QSlider, QHBoxLayout, QPushButton, QVBoxLayout, QFileDialog
+
+try:
+    unicode        # Python 2
+except NameError:
+    unicode = str  # Python 3
 
 
-class Player:
-    '''
-        args:设置 options
-    '''
-    def __init__(self, *args):
-        if args:
-            instance = vlc.Instance(*args)
-            self.media = instance.media_player_new()
+class Player(QMainWindow):
+    """A simple Media Player using VLC and Qt
+    """
+    def __init__(self, master=None):
+        QMainWindow.__init__(self, master)
+        self.setWindowTitle("biubiu Player")
+
+        # creating a basic vlc instance
+        self.instance = vlc.Instance()
+        # creating an empty vlc media player
+        self.mediaplayer = self.instance.media_player_new()
+
+        self.createUI()
+        self.isPaused = False
+
+    def createUI(self):
+        """Set up the user interface, signals & slots
+        """
+        self.widget = QWidget(self)
+        self.setCentralWidget(self.widget)
+
+        # In this widget, the video will be drawn
+        if sys.platform == "darwin": # for MacOS
+            # self.videoframe = QtGui.QMacCocoaViewContainer(0)
+            self.videoframe = QFrame()
         else:
-            self.media = vlc.MediaPlayer()
+            self.videoframe = QFrame()
+        self.palette = self.videoframe.palette()
+        self.palette.setColor (QtGui.QPalette.Window,
+                               QtGui.QColor(0,0,0))
+        self.videoframe.setPalette(self.palette)
+        self.videoframe.setAutoFillBackground(True)
 
-    # 设置待播放的url地址或本地文件路径，每次调用都会重新加载资源
-    def set_uri(self, uri):
-        self.media.set_mrl(uri)
+        self.positionslider = QSlider(QtCore.Qt.Horizontal, self)
+        self.positionslider.setToolTip("Position")
+        self.positionslider.setMaximum(1000)
+        self.positionslider.sliderMoved.connect(self.setPosition)
+        # self.connect(self.positionslider,
+                    #  QtCore.SIGNAL("sliderMoved(int)"), self.setPosition)
 
-    # 播放 成功返回0，失败返回-1
-    def play(self, path=None):
-        if path:
-            self.set_uri(path)
-            return self.media.play()
+        self.hbuttonbox = QHBoxLayout()
+        self.playbutton = QPushButton("Play")
+        self.hbuttonbox.addWidget(self.playbutton)
+        self.playbutton.clicked.connect(self.PlayPause)
+        # self.connect(self.playbutton, QtCore.SIGNAL("clicked()"),
+                    #  self.PlayPause)
+
+        self.stopbutton = QPushButton("Stop")
+        self.hbuttonbox.addWidget(self.stopbutton)
+        self.stopbutton.clicked.connect(self.Stop)
+        # self.connect(self.stopbutton, QtCore.SIGNAL("clicked()"),
+                    #  self.Stop)
+
+        self.hbuttonbox.addStretch(1)
+        self.volumeslider = QSlider(QtCore.Qt.Horizontal, self)
+        self.volumeslider.setMaximum(100)
+        self.volumeslider.setValue(self.mediaplayer.audio_get_volume())
+        self.volumeslider.setToolTip("Volume")
+        self.hbuttonbox.addWidget(self.volumeslider)
+        self.volumeslider.valueChanged.connect(self.setVolume)
+        # self.connect(self.volumeslider,
+                    #  QtCore.SIGNAL("valueChanged(int)"),
+                    #  self.setVolume)
+        
+        self.vboxlayout = QVBoxLayout()
+        self.vboxlayout.addWidget(self.videoframe)
+        self.vboxlayout.addWidget(self.positionslider)
+        self.vboxlayout.addLayout(self.hbuttonbox)
+
+        self.widget.setLayout(self.vboxlayout)
+
+        open = QAction("&Open", self)
+        open.triggered.connect(self.OpenFile)
+        # self.connect(open, QtCore.SIGNAL("triggered()"), self.OpenFile)
+        exit = QAction("&Exit", self)
+        exit.triggered.connect(sys.exit)
+        # self.connect(exit, QtCore.SIGNAL("triggered()"), sys.exit)
+        menubar = self.menuBar()
+        filemenu = menubar.addMenu("&File")
+        filemenu.addAction(open)
+        filemenu.addSeparator()
+        filemenu.addAction(exit)
+
+        self.timer = QtCore.QTimer(self)
+        self.timer.setInterval(200)
+        self.timer.timeout.connect(self.updateUI)
+        # self.connect(self.timer, QtCore.SIGNAL("timeout()"),
+                    #  self.updateUI)
+    @Slot()
+    def PlayPause(self):
+        """Toggle play/pause status
+        """
+        if self.mediaplayer.is_playing():
+            self.mediaplayer.pause()
+            self.playbutton.setText("Play")
+            self.isPaused = True
         else:
-            return self.media.play()
+            if self.mediaplayer.play() == -1:
+                self.OpenFile()
+                return
+            self.mediaplayer.play()
+            self.playbutton.setText("Pause")
+            self.timer.start()
+            self.isPaused = False
+    @Slot()
+    def Stop(self):
+        """Stop player
+        """
+        self.mediaplayer.stop()
+        self.playbutton.setText("Play")
+    @Slot()
+    def OpenFile(self, filename=None):
+        """Open a media file in a MediaPlayer
+        """
+        if filename is None:
+            filename = QFileDialog.getOpenFileName(self, "Open File", os.path.expanduser('~'))
+        if not filename:
+            return
 
-    # 暂停
-    def pause(self):
-        self.media.pause()
+        # create the media
+        if sys.version < '3':
+            filename = unicode(filename)
+        self.media = self.instance.media_new(filename[0])
+        # put the media in the media player
+        self.mediaplayer.set_media(self.media)
 
-    # 恢复
-    def resume(self):
-        self.media.set_pause(0)
+        # parse the metadata of the file
+        self.media.parse()
+        # set the title of the track as window title
+        self.setWindowTitle(self.media.get_meta(0))
 
-    # 停止
-    def stop(self):
-        self.media.stop()
+        # the media player has to be 'connected' to the QFrame
+        # (otherwise a video would be displayed in it's own window)
+        # this is platform specific!
+        # you have to give the id of the QFrame (or similar object) to
+        # vlc, different platforms have different functions for this
+        if sys.platform.startswith('linux'): # for Linux using the X Server
+            self.mediaplayer.set_xwindow(self.videoframe.winId())
+        elif sys.platform == "win32": # for Windows
+            self.mediaplayer.set_hwnd(self.videoframe.winId())
+        elif sys.platform == "darwin": # for MacOS
+            self.mediaplayer.set_nsobject(self.videoframe.winId())
+        self.PlayPause()
+    @Slot()
+    def setVolume(self, Volume):
+        """Set the volume
+        """
+        self.mediaplayer.audio_set_volume(Volume)
+    
+    @Slot()
+    def setPosition(self, position):
+        """Set the position
+        """
+        # setting the position to where the slider was dragged
+        self.mediaplayer.set_position(position / 1000.0)
+        # the vlc MediaPlayer needs a float value between 0 and 1, Qt
+        # uses integer variables, so you need a factor; the higher the
+        # factor, the more precise are the results
+        # (1000 should be enough)
+    @Slot()
+    def updateUI(self):
+        """updates the user interface"""
+        # setting the slider to the desired position
+        self.positionslider.setValue(self.mediaplayer.get_position() * 1000)
 
-    # 释放资源
-    def release(self):
-        return self.media.release()
+        if not self.mediaplayer.is_playing():
+            # no need to call this function if nothing is played
+            self.timer.stop()
+            if not self.isPaused:
+                # after the video finished, the play button stills shows
+                # "Pause", not the desired behavior of a media player
+                # this will fix it
+                self.Stop()
 
-    # 是否正在播放
-    def is_playing(self):
-        return self.media.is_playing()
-
-    # 已播放时间，返回毫秒值
-    def get_time(self):
-        return self.media.get_time()
-
-    # 拖动指定的毫秒值处播放。成功返回0，失败返回-1 (需要注意，只有当前多媒体格式或流媒体协议支持才会生效)
-    def set_time(self, ms):
-        return self.media.get_time()
-
-    # 音视频总长度，返回毫秒值
-    def get_length(self):
-        return self.media.get_length()
-
-    # 获取当前音量（0~100）
-    def get_volume(self):
-        return self.media.audio_get_volume()
-
-    # 设置音量（0~100）
-    def set_volume(self, volume):
-        return self.media.audio_set_volume(volume)
-
-    # 返回当前状态：正在播放；暂停中；其他
-    def get_state(self):
-        state = self.media.get_state()
-        if state == vlc.State.Playing:
-            return 1
-        elif state == vlc.State.Paused:
-            return 0
-        else:
-            return -1
-
-    # 当前播放进度情况。返回0.0~1.0之间的浮点数
-    def get_position(self):
-        return self.media.get_position()
-
-    # 拖动当前进度，传入0.0~1.0之间的浮点数(需要注意，只有当前多媒体格式或流媒体协议支持才会生效)
-    def set_position(self, float_val):
-        return self.media.set_position(float_val)
-
-    # 获取当前文件播放速率
-    def get_rate(self):
-        return self.media.get_rate()
-
-    # 设置播放速率（如：1.2，表示加速1.2倍播放）
-    def set_rate(self, rate):
-        return self.media.set_rate(rate)
-
-    # 设置宽高比率（如"16:9","4:3"）
-    def set_ratio(self, ratio):
-        self.media.video_set_scale(0)  # 必须设置为0，否则无法修改屏幕宽高
-        self.media.video_set_aspect_ratio(ratio)
-
-    # 注册监听器
-    def add_callback(self, event_type, callback):
-        self.media.event_manager().event_attach(event_type, callback)
-
-    # 移除监听器
-    def remove_callback(self, event_type, callback):
-        self.media.event_manager().event_detach(event_type, callback)
-
-def my_call_back(event):
-    print("call:", player.get_time())
-
-
-if "__main__" == __name__:
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
     player = Player()
-    player.add_callback(vlc.EventType.MediaPlayerTimeChanged, my_call_back)
-    # 在线播放流媒体视频
-    player.play("./1.mkv")
-
-    # 播放本地mp3
-    # player.play("D:/abc.mp3")
-
-    # 防止当前进程退出
-    while True:
-        pass
+    player.show()
+    player.resize(640, 480)
+    if sys.argv[1:]:
+        player.OpenFile(sys.argv[1])
+    sys.exit(app.exec_())
