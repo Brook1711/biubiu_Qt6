@@ -99,13 +99,32 @@ class Player(QMainWindow):
         # self.connect(self.volumeslider,
                     #  QtCore.SIGNAL("valueChanged(int)"),
                     #  self.setVolume)
-        
+        # ** add right sidebar
+        self.right_layout = QVBoxLayout()
+        # edit the content in right sidebar
+        self.test_btn = QPushButton()
+        ## currently empty
+        self.right_layout.addWidget(self.test_btn)
+        self.right_layout.addStretch(5)
+        self.right_layout.setSpacing(20)
+        self.right_widget = QWidget()
+        self.right_widget.setLayout(self.right_layout)
+        # ** end right sidebar
+
+        # ** add left play zone (video box)
         self.vboxlayout = QVBoxLayout()
         self.vboxlayout.addWidget(self.videoframe)
         self.vboxlayout.addWidget(self.positionslider)
         self.vboxlayout.addLayout(self.hbuttonbox)
+        self.left_widget = QWidget()
+        self.left_widget.setLayout(self.vboxlayout)
+        # ** end left play zone
 
-        self.widget.setLayout(self.vboxlayout)
+        # ** add left and right widget
+        self.main_layout = QHBoxLayout()
+        self.main_layout.addWidget(self.left_widget)
+        self.main_layout.addWidget(self.right_widget)
+        self.widget.setLayout(self.main_layout)
 
         open = QAction("&Open", self)
         open.triggered.connect(self.OpenFile)
