@@ -22,7 +22,7 @@ import sys
 import os.path, os
 if sys.platform == "win32": 
     os.environ['PYTHON_VLC_MODULE_PATH'] = "./vlc-3.0.16"
-
+import time
 import vlc
 from PySide6 import QtGui, QtCore
 from PySide6.QtCore import Slot, Qt
@@ -34,6 +34,23 @@ try:
     unicode        # Python 2
 except NameError:
     unicode = str  # Python 3
+
+class VideoInfo(QGroupBox):
+    def __init__(self, parent=None):
+        super(VideoInfo, self).__init__(parent)
+        self.layout = QVBoxLayout()
+        self.setFixedWidth(400)
+        # self.setFixedHeight(200)
+        self.text1_widget=QLabel("视频标题")
+        self.text2_widget=QLabel("视频格式")
+        self.text3_widget=QLabel("视频时长")
+        self.text1_widget.setWordWrap(True)
+        self.text2_widget.setWordWrap(True)
+        self.text3_widget.setWordWrap(True)
+        self.layout.addWidget(self.text1_widget)
+        self.layout.addWidget(self.text2_widget)
+        self.layout.addWidget(self.text3_widget)
+        self.setLayout(self.layout)
 
 class UserInfo(QGroupBox):
 
@@ -158,6 +175,9 @@ class Player(QMainWindow):
         ## currently empty
         self.user_info = UserInfo()
         self.right_layout.addWidget(self.user_info)
+        self.video_info = VideoInfo()
+        self.right_layout.addWidget(self.video_info)
+
         self.right_layout.addStretch(10)
         
         # self.right_layout.setSpacing(20)
@@ -242,6 +262,8 @@ class Player(QMainWindow):
 
         # parse the metadata of the file
         self.media.parse()
+        self.video_info.text1_widget.setText("视频标题为："+self.media.get_meta(0)) 
+        self.video_info.text3_widget.setText(("视频时长为："+str(self.media.get_duration())+"s"))
         # set the title of the track as window title
         self.setWindowTitle(self.media.get_meta(0))
 
@@ -257,6 +279,9 @@ class Player(QMainWindow):
         elif sys.platform == "darwin": # for MacOS
             self.mediaplayer.set_nsobject(self.videoframe.winId())
         self.PlayPause()
+        time.sleep(1)
+        self.video_info.text2_widget.setText("视频音频情况："+str(self.mediaplayer.audio_get_track_description())+"\n可用字幕"+str(self.mediaplayer.video_get_spu_description()))
+        
     @Slot()
     def setVolume(self, Volume):
         """Set the volume

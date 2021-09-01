@@ -64,6 +64,14 @@ https://www.cnblogs.com/laizhenghong2012/p/10085089.html
 
 
 
+#### 视频信息
+
+主要来源python-vlc中的Media类和MediaPlayer类：
+
+[vlc.Media (olivieraubert.net)](https://www.olivieraubert.net/vlc/python-ctypes/doc/vlc.Media-class.html#get_meta)
+
+[vlc.MediaPlayer (olivieraubert.net)](https://www.olivieraubert.net/vlc/python-ctypes/doc/vlc.MediaPlayer-class.html)
+
 
 
 ## Widget
