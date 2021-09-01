@@ -35,18 +35,37 @@ try:
 except NameError:
     unicode = str  # Python 3
 
+
 class Comment(QGroupBox):
     def __init__(self, parent=None):
-        super(CommentArea, self).__init__(parent)
+        super(Comment, self).__init__(parent)
         self.layout = QVBoxLayout()
-        self.setFixedWidth(400)
+        self.setFixedWidth(380)
+        self.setFixedHeight(100)
+        self.user_name = QLabel("用户名称")
+        self.user_comment = QLabel("评论内容")
+        self.layout.addWidget(self.user_name)
+        self.layout.addWidget(self.user_comment)
+        self.setLayout(self.layout)
 
 
 class CommentArea(QScrollArea):
     def __init__(self, parent=None):
         super(CommentArea, self).__init__(parent)
         self.layout = QVBoxLayout()
-        self.setFixedWidth(400)
+        self.widget = QWidget()
+        # self.layout = QVBoxLayout()
+        self.widget.setFixedWidth(400)
+        # self.widget.setFixedHeight(600)
+        for i in range(20):
+            comment = Comment()
+            self.layout.addWidget(comment)
+        self.widget.setLayout(self.layout)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setWidgetResizable(True)
+        self.setWidget(self.widget)
+
 
 
 class VideoInfo(QGroupBox):
@@ -191,8 +210,9 @@ class Player(QMainWindow):
         self.right_layout.addWidget(self.user_info)
         self.video_info = VideoInfo()
         self.right_layout.addWidget(self.video_info)
-
-        self.right_layout.addStretch(10)
+        self.comment_aera = CommentArea()
+        self.right_layout.addWidget(self.comment_aera)
+        # self.right_layout.addStretch(10)
         
         # self.right_layout.setSpacing(20)
         # self.right_layout.SetFixedSize()
