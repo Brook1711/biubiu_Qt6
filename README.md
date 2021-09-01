@@ -72,7 +72,17 @@ https://www.cnblogs.com/laizhenghong2012/p/10085089.html
 
 [vlc.MediaPlayer (olivieraubert.net)](https://www.olivieraubert.net/vlc/python-ctypes/doc/vlc.MediaPlayer-class.html)
 
+获取视频轨道（播放器开始播放之后才会有输出）：
 
+self.mediaplayer.video_get_track_description()
+
+获取音频轨道（播放器开始播放之后才会有输出）：
+
+self.mediaplayer.audio_get_track_description()
+
+设置音频轨道：
+
+[Python VLC MediaPlayer – 设置当前音轨 - GeeksforGeeks (ghyjx.com)](http://www.ghyjx.com/python-vlc-mediaplayer-setting-current-audio-track/)
 
 ## Widget
 
