@@ -25,15 +25,43 @@ if sys.platform == "win32":
 
 import vlc
 from PySide6 import QtGui, QtCore
-from PySide6.QtCore import Slot
-from PySide6.QtGui import QAction
+from PySide6.QtCore import Slot, Qt 
+from PySide6.QtGui import QAction, QIcon
 
-from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QFrame, QSlider, QHBoxLayout, QPushButton, QVBoxLayout, QFileDialog
+from PySide6.QtWidgets import QLayout, QMainWindow, QApplication, QWidget, QFrame, QSlider, QHBoxLayout, QPushButton, QVBoxLayout, QFileDialog, QGroupBox, QLabel, QPixmap, QPainter, QPainterPath
 
 try:
     unicode        # Python 2
 except NameError:
     unicode = str  # Python 3
+
+class UserInfo(QGroupBox):
+
+    def __init__(self, parent=None):
+        super(UserInfo, self).__init__(parent)
+        self.col = QHBoxLayout()
+        # Create widgets
+        self.setFixedWidth(300)
+        self.setFixedHeight(200)
+        self.ico = QLabel()
+        self.ico.setStyleSheet("background-color:red;border:0px")
+        self.ico.setMaximumWidth(100)
+        self.ico.setMaximumHeight(100)
+
+        self.user_img = QPixmap('./1.ico')
+        self.user_img_fill = QPixmap(200,200)
+        self.user_img_fill.fill(Qt.transparent)
+        painter = QPainter(self.user_img_fill)
+        painter.begin(self) 
+        painter.setRenderHints(QPainter.Antialiasing |QPainter.SmoothPixmapTransform)       #一个是平滑，一个是缩放保持比例
+        path = QPainterPath()
+        path.addEllipse(0, 0, 200, 200)
+        painter.setClipPath(path)
+        painter.drawPixmap(0, 0, 200, 200, self.user_img)
+        painter.end()
+        self.ico.setPixmap(self.user_img_fill)
+        self.col.addWidget(self.ico)
+        self.setLayout(self.col)
 
 
 class Player(QMainWindow):

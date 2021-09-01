@@ -25,17 +25,68 @@ if sys.platform == "win32":
 
 import vlc
 from PySide6 import QtGui, QtCore
-from PySide6.QtCore import Slot
-from PySide6.QtGui import QAction
+from PySide6.QtCore import Slot, Qt
+from PySide6.QtGui import QAction, QPainter, QPainterPath, QPixmap
 
-from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QFrame, QSlider, QHBoxLayout, QPushButton, QVBoxLayout, QFileDialog
+from PySide6.QtWidgets import QLayout, QMainWindow, QApplication, QSplitter, QWidget, QFrame, QSlider, QHBoxLayout, QPushButton, QVBoxLayout, QFileDialog, QGroupBox, QLabel 
 
 try:
     unicode        # Python 2
 except NameError:
     unicode = str  # Python 3
 
+class UserInfo(QGroupBox):
 
+    def __init__(self, parent=None):
+        super(UserInfo, self).__init__(parent)
+        self.col = QHBoxLayout()
+        # Create widgets
+        self.setFixedWidth(400)
+        self.setFixedHeight(200)
+        self.radius = 50
+        self.Antialiasing=True
+
+        #####################核心实现#########################
+        
+        self.ico = QLabel()
+        self.ico.setMaximumSize(2*self.radius, 2*self.radius)
+        self.ico.setMinimumSize(2*self.radius, 2*self.radius)
+        self.target = QPixmap(self.ico.size())  # 大小和控件一样
+        self.target.fill(Qt.transparent)  # 填充背景为透明
+
+        p = QPixmap("1.ico").scaled(  # 加载图片并缩放和控件一样大
+            2*self.radius, 2*self.radius, Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation)
+
+        painter = QPainter(self.target)
+        if self.Antialiasing:
+            # 抗锯齿
+            painter.setRenderHint(QPainter.Antialiasing, True)
+            # painter.setRenderHint(QPainter.HighQualityAntialiasing, True) # can not execute under Qt6
+            painter.setRenderHint(QPainter.SmoothPixmapTransform, True)
+
+        #         painter.setPen(# 测试圆圈
+        #             QPen(Qt.red, 5, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
+        path = QPainterPath()
+        path.addRoundedRect(
+            0, 0, self.ico.width(), self.ico.height(), self.radius, self.radius)
+        # **** 切割为圆形 ****#
+        painter.setClipPath(path)
+        #         painter.drawPath(path)  # 测试圆圈
+
+        painter.drawPixmap(0, 0, p)
+        self.ico.setPixmap(self.target)
+        #####################核心实现#########################
+        #####################头像右边文字#####################
+        self.user_text_layout = QVBoxLayout()
+        self.text1_widget = QLabel("用户名称")
+        self.text2_widget = QLabel("用户状态")
+        self.user_text_layout.addWidget(self.text1_widget)
+        self.user_text_layout.addWidget(self.text2_widget)
+        #####################头像右边文字#####################
+        self.col.addWidget(self.ico)
+        self.col.addLayout(self.user_text_layout)
+        self.setLayout(self.col)
+        
 class Player(QMainWindow):
     """A simple Media Player using VLC and Qt
     """
@@ -54,7 +105,7 @@ class Player(QMainWindow):
     def createUI(self):
         """Set up the user interface, signals & slots
         """
-        self.widget = QWidget(self)
+        self.widget = QSplitter(self)
         self.setCentralWidget(self.widget)
 
         # In this widget, the video will be drawn
@@ -102,13 +153,18 @@ class Player(QMainWindow):
         # ** add right sidebar
         self.right_layout = QVBoxLayout()
         # edit the content in right sidebar
+
         self.test_btn = QPushButton()
         ## currently empty
-        self.right_layout.addWidget(self.test_btn)
-        self.right_layout.addStretch(5)
-        self.right_layout.setSpacing(20)
+        self.user_info = UserInfo()
+        self.right_layout.addWidget(self.user_info)
+        self.right_layout.addStretch(10)
+        
+        # self.right_layout.setSpacing(20)
+        # self.right_layout.SetFixedSize()
         self.right_widget = QWidget()
         self.right_widget.setLayout(self.right_layout)
+        self.right_widget.setFixedWidth(400)
         # ** end right sidebar
 
         # ** add left play zone (video box)
@@ -121,11 +177,14 @@ class Player(QMainWindow):
         # ** end left play zone
 
         # ** add left and right widget
-        self.main_layout = QHBoxLayout()
-        self.main_layout.addWidget(self.left_widget)
-        self.main_layout.addWidget(self.right_widget)
-        self.widget.setLayout(self.main_layout)
-
+        
+        # self.main_layout = QHBoxLayout()
+        # self.main_layout.addWidget(self.left_widget)
+        # self.main_layout.addWidget(self.right_widget)
+        self.widget.addWidget(self.left_widget)
+        self.widget.addWidget(self.right_widget)
+        self.widget.setStretchFactor(3, 4)
+        # self.widget.setSizes([500, 250])
         open = QAction("&Open", self)
         open.triggered.connect(self.OpenFile)
         # self.connect(open, QtCore.SIGNAL("triggered()"), self.OpenFile)

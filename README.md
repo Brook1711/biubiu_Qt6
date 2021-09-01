@@ -48,3 +48,33 @@ https://www.cnblogs.com/laizhenghong2012/p/10085089.html
 
 ![image-20210830121834596](README.assets/image-20210830121834596.png)
 
+
+
+## Layout
+
+左右两个组件使用两个不同的`QLayout`来包装，这样调整格式的时候只需要对`layout`进行属性调整
+
+### RightLayout
+
+右边栏设计为用户和视频信息以及搜索栏三大块
+
+#### 用户信息
+
+[(54条消息) pyqt显示圆形图片_YH_24H的博客-CSDN博客](https://blog.csdn.net/YH_24H/article/details/107919748)
+
+
+
+
+
+## Widget
+
+### spliter
+
+由于分为左右边栏形式，主组件采用的是`QSpliter`模块
+
+[QSplitter — Qt for Python](https://doc.qt.io/qtforpython/PySide6/QtWidgets/QSplitter.html)
+
+参考以下链接将左右边栏设置为可拖动调节大小
+
+[qt - Semi-resizable widgets in PyQt - Stack Overflow](https://stackoverflow.com/questions/32891789/semi-resizable-widgets-in-pyqt)
+
