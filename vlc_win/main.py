@@ -28,12 +28,26 @@ from PySide6 import QtGui, QtCore
 from PySide6.QtCore import Slot, Qt
 from PySide6.QtGui import QAction, QPainter, QPainterPath, QPixmap
 
-from PySide6.QtWidgets import QLayout, QMainWindow, QApplication, QSplitter, QWidget, QFrame, QSlider, QHBoxLayout, QPushButton, QVBoxLayout, QFileDialog, QGroupBox, QLabel 
+from PySide6.QtWidgets import QLayout, QMainWindow, QApplication, QScrollArea, QSplitter, QWidget, QFrame, QSlider, QHBoxLayout, QPushButton, QVBoxLayout, QFileDialog, QGroupBox, QLabel, QScrollArea
 
 try:
     unicode        # Python 2
 except NameError:
     unicode = str  # Python 3
+
+class Comment(QGroupBox):
+    def __init__(self, parent=None):
+        super(CommentArea, self).__init__(parent)
+        self.layout = QVBoxLayout()
+        self.setFixedWidth(400)
+
+
+class CommentArea(QScrollArea):
+    def __init__(self, parent=None):
+        super(CommentArea, self).__init__(parent)
+        self.layout = QVBoxLayout()
+        self.setFixedWidth(400)
+
 
 class VideoInfo(QGroupBox):
     def __init__(self, parent=None):
@@ -280,7 +294,8 @@ class Player(QMainWindow):
             self.mediaplayer.set_nsobject(self.videoframe.winId())
         self.PlayPause()
         time.sleep(1)
-        self.video_info.text2_widget.setText("视频音频情况："+str(self.mediaplayer.audio_get_track_description())+"\n可用字幕"+str(self.mediaplayer.video_get_spu_description()))
+        self.video_info.text2_widget.setText('视频音频情况：'+str([(i[0], i[1].decode()) for i in self.mediaplayer.audio_get_track_description()])+"\n可用字幕"+str([(i[0], i[1].decode()) for i in self.mediaplayer.video_get_spu_description()]))
+        
         
     @Slot()
     def setVolume(self, Volume):
