@@ -5,12 +5,43 @@ if sys.platform == "win32":
 import time
 import vlc
 from PySide6 import QtGui, QtCore
-from PySide6.QtCore import Slot, Qt
-from PySide6.QtGui import QAction, QPainter, QPainterPath, QPixmap
+from PySide6.QtCore import QPoint, Slot, Qt
+from PySide6.QtGui import QAction, QPainter, QPainterPath, QPixmap,QFont
 
-from PySide6.QtWidgets import QLayout, QMainWindow, QApplication, QScrollArea, QSplitter, QWidget, QFrame, QSlider, QHBoxLayout, QPushButton, QVBoxLayout, QFileDialog, QGroupBox, QLabel, QScrollArea
+from PySide6.QtWidgets import QLayout, QMainWindow, QApplication, QScrollArea, QSplitter, QTextBrowser, QWidget, QFrame, QSlider, QHBoxLayout, QPushButton, QVBoxLayout, QFileDialog, QGroupBox, QLabel, QScrollArea, QGridLayout
 
 from biubiuLib.SidebarLib import CommentArea, UserInfo, VideoInfo
+from biubiuLib.DanmuLib import Danmu, DanmuPool
+
+class TextBrowser(QWidget):
+
+    def __init__(self, parent):
+        super(TextBrowser, self).__init__(parent)
+        self.setWindowTitle('弹幕机')
+        # self.setWindowFlags()
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Tool)
+        # self.setWindowFlags(Qt.FramelessWindowHint | Qt.Window)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        # self.setWindowOpacity(0.1)
+        self.setFixedHeight(400)
+        self.setFixedWidth(400)
+        layout = QGridLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
+        self.textBrowser = QTextBrowser(        )
+        self.textBrowser.setFont(QFont('Microsoft JhengHei', 14, QFont.Bold))
+        
+        # self.textBrowser.setStyleSheet("background:transparent")
+        layout.addWidget(self.textBrowser, 1, 0, 1, 10)
+        self.textBrowser.setText("<h1>hello</h1>\n<h1>hello</h1>\n<h1>hello</h1>")
+        self.textBrowser.setStyleSheet("background:transparent;border-width:0;border-style:outset")
+        self.textBrowser.setAutoFillBackground(False)
+        self.textBrowser.setFixedHeight(200)
+        # self.textBrowser.set
+
+
+
 
 class Player(QMainWindow):
     """A simple Media Player using VLC and Qt
@@ -32,19 +63,25 @@ class Player(QMainWindow):
         """
         self.widget = QSplitter(self)
         self.setCentralWidget(self.widget)
+        self.video_zone = QFrame()
+        self.videoframe = QFrame()
+        self.danmu_zone = TextBrowser(self.video_zone)
+        self.videoframe.setParent(self.video_zone)
+        # self.danmu_zone.setParent()
 
+        # self.video_zone.text_view = QTextBrowser()
         # In this widget, the video will be drawn
-        if sys.platform == "darwin": # for MacOS
-            # self.videoframe = QtGui.QMacCocoaViewContainer(0)
-            self.videoframe = QFrame()
-        else:
-            self.videoframe = QFrame()
+        # if sys.platform == "darwin": # for MacOS
+        #     # self.videoframe = QtGui.QMacCocoaViewContainer(0)
+        #     self.videoframe = QFrame()
+        # else:
+        #     self.videoframe = QFrame()
         self.palette = self.videoframe.palette()
         self.palette.setColor (QtGui.QPalette.Window,
-                               QtGui.QColor(0,0,0))
+                               Qt.transparent)
         self.videoframe.setPalette(self.palette)
         self.videoframe.setAutoFillBackground(True)
-
+        # self.video_zone.show()
         self.positionslider = QSlider(QtCore.Qt.Horizontal, self)
         self.positionslider.setToolTip("Position")
         self.positionslider.setMaximum(1000)
@@ -98,7 +135,7 @@ class Player(QMainWindow):
 
         # ** add left play zone (video box)
         self.vboxlayout = QVBoxLayout()
-        self.vboxlayout.addWidget(self.videoframe)
+        self.vboxlayout.addWidget(self.video_zone)
         self.vboxlayout.addWidget(self.positionslider)
         self.vboxlayout.addLayout(self.hbuttonbox)
         self.left_widget = QWidget()
@@ -110,6 +147,7 @@ class Player(QMainWindow):
         # self.main_layout = QHBoxLayout()
         # self.main_layout.addWidget(self.left_widget)
         # self.main_layout.addWidget(self.right_widget)
+        
         self.widget.addWidget(self.left_widget)
         self.widget.addWidget(self.right_widget)
         self.widget.setStretchFactor(3, 4)
@@ -129,8 +167,9 @@ class Player(QMainWindow):
         self.timer = QtCore.QTimer(self)
         self.timer.setInterval(200)
         self.timer.timeout.connect(self.updateUI)
-        # self.connect(self.timer, QtCore.SIGNAL("timeout()"),
-                    #  self.updateUI)
+
+    
+
     @Slot()
     def PlayPause(self):
         """Toggle play/pause status
@@ -190,6 +229,16 @@ class Player(QMainWindow):
         self.PlayPause()
         time.sleep(1)
         self.video_info.text2_widget.setText('视频音频情况：'+str([(i[0], i[1].decode()) for i in self.mediaplayer.audio_get_track_description()])+"\n可用字幕"+str([(i[0], i[1].decode()) for i in self.mediaplayer.video_get_spu_description()]))
+        self.danmu_zone.show()
+        # value = int(7 / 101 * 256)
+        # color = str(hex(value))[2:] + '000000'
+        # self.danmu_zone.textBrowser.setStyleSheet('background-color:#%s' % color)
+        self.danmu_zone.setStyleSheet("background:transparent;border-width:0;border-style:outset")
+
+
+        
+        
+
         
         
     @Slot()

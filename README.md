@@ -62,6 +62,27 @@ https://www.cnblogs.com/laizhenghong2012/p/10085089.html
 
 [(54条消息) pyqt显示圆形图片_YH_24H的博客-CSDN博客](https://blog.csdn.net/YH_24H/article/details/107919748)
 
+### LeftLayout
+
+#### 视频播放
+
+采用python-vlc的形式直接调用vlc的api
+
+#### 弹幕系统（只考虑横向移动弹幕）
+
+分为弹幕池和单条弹幕
+弹幕全部存放在另一个窗口：[pyqt 测试模板 子窗口 addChildWidget 覆盖 遮罩 半透明_abc-程序员宅基地 - 程序员宅基地 (cxyzjd.com)](https://www.cxyzjd.com/article/wowocpp/105759407)
+单条弹幕要素：
+
+1. 弹幕内容
+采用QLabel作为父类，使用QFont控制字体，使用QPalette控制颜色
+2. 出现时间
+读取进度条目前时间并绑定事件，和QTimer有关。使用QPropertyAnimation.start()控制弹幕开始移动。
+3. Y轴位置
+使用QPropertyAnimation创建动画属性，使用QPropertyAnimation..setStartValue & 使用QPropertyAnimation.setEndValue设置动画起始和终止点；使用QPropertyAnimation.setEasingCurve(QEasingCurve.Linear)控制移动轨迹为线性轨迹。
+4. 移动速度
+使用QPropertyAnimation.setDuration(int)控制动画持续时间。
+
 
 
 #### 视频信息
