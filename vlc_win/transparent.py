@@ -1,46 +1,114 @@
-import sys
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt5 import QtCore, QtGui, QtWidgets
 
-class DockDemo(QMainWindow):
-    def __init__(self,parent=None):
-        super(DockDemo, self).__init__(parent)
-        #设置水平布局
-        layout=QHBoxLayout()
-        #实例化菜单栏
-        bar=self.menuBar()
-        #创建主菜单file，在其中添加子菜单
-        file=bar.addMenu('File')
-        file.addAction('New')
-        file.addAction('Save')
-        file.addAction('quit')
+class ControlBar(QtWidgets.QFrame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        layout = QtWidgets.QVBoxLayout(self)
+        self.slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        layout.addWidget(self.slider)
+        buttons = QtWidgets.QHBoxLayout()
+        layout.addLayout(buttons)
+        buttons.addWidget(QtWidgets.QToolButton(text='play'))
+        buttons.addWidget(QtWidgets.QToolButton(text='stop'))
+        buttons.addStretch()
 
-        #创建QDockWidget窗口（标题，自身窗口）
-        self.items=QDockWidget('Dockable',self)
 
-        #实例化列表窗口，添加几个条目
-        self.listWidget=QListWidget()
-        self.listWidget.addItem('Item1')
-        self.listWidget.addItem('Item2')
-        self.listWidget.addItem('Item3')
-        self.listWidget.addItem('Item4')
+class VolumeWidget(QtWidgets.QFrame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.setContentsMargins(2, 2, 2, 0)
+        layout.setSpacing(1)
+        handle = QtWidgets.QFrame()
+        handle.setFixedHeight(12)
+        handle.setStyleSheet('''
+            QFrame {
+                border: 1px solid darkGray;
+                border-radius: 2px;
+                background: #aa646464;
+            }
+        ''')
+        layout.addWidget(handle)
+        volumeLayout = QtWidgets.QHBoxLayout()
+        layout.addLayout(volumeLayout)
+        for i in range(4):
+            volumeLayout.addWidget(QtWidgets.QSlider(QtCore.Qt.Vertical))
 
-        #在窗口区域设置QWidget，添加列表控件
-        self.items.setWidget(self.listWidget)
+    def mousePressEvent(self, event):
+        if event.button() == QtCore.Qt.LeftButton:
+            self.startPos = event.pos()
 
-        #设置dock窗口是否可以浮动，True，运行浮动在外面，自动与主界面脱离，False，默认浮动主窗口内，可以手动脱离
-        self.items.setFloating(False)
+    def mouseMoveEvent(self, event):
+        if event.buttons() == QtCore.Qt.LeftButton:
+            delta = event.pos() - self.startPos
+            self.move(self.pos() + delta)
 
-        #设置QTextEdit为中央小控件
-        self.setCentralWidget(QTextEdit())
-        #将窗口放置在中央小控件的右侧
-        self.addDockWidget(Qt.RightDockWidgetArea,self.items)
 
-        self.setLayout(layout)
-        self.setWindowTitle('Dock 例子')
-if __name__ == '__main__':
-    app=QApplication(sys.argv)
-    demo=DockDemo()
-    demo.show()
-    sys.exit(app.exec_())
+class Notification(QtWidgets.QFrame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        layout = QtWidgets.QHBoxLayout(self)
+        self.label = QtWidgets.QLabel('Notification', alignment=QtCore.Qt.AlignCenter)
+        layout.addWidget(self.label)
+
+
+class PlayerWidget(QtWidgets.QWidget):
+    def __init__(self):
+        super().__init__()
+        self.video = QtWidgets.QLabel(self)
+        self.video.setPixmap(QtGui.QPixmap('movie.png'))
+        self.video.setScaledContents(True)
+        self.controlBar = ControlBar(self)
+        self.notification = Notification(self)
+        self.volumeWidget = VolumeWidget(self)
+        self.volumeWidget.move(30, 30)
+
+        self.setStyleSheet('''
+            VolumeWidget, ControlBar {
+                border: 1px outset darkGray;
+                border-radius: 4px;
+                background: #aad3d3d3;
+            }
+            VolumeWidget:hover, ControlBar:hover {
+                background: #d3d3d3;
+            }
+            Notification {
+                border: 1px outset darkGray;
+                border-radius: 4px;
+                background: #aa242424;
+            }
+            Notification QLabel {
+                color: white;
+            }
+        ''')
+
+    def sizeHint(self):
+        if self.video.pixmap() and not self.video.pixmap().isNull():
+            return self.video.pixmap().size()
+        return QtCore.QSize(640, 480)
+
+    def resizeEvent(self, event):
+        # set the geometry of the "video"
+        videoRect = QtCore.QRect(
+            QtCore.QPoint(), 
+            self.video.sizeHint().scaled(self.size(), QtCore.Qt.KeepAspectRatio))
+        videoRect.moveCenter(self.rect().center())
+        self.video.setGeometry(videoRect)
+
+        # control panel
+        controlHeight = self.controlBar.sizeHint().height()
+        controlRect = QtCore.QRect(0, self.height() - controlHeight, 
+            self.width(), controlHeight)
+        self.controlBar.setGeometry(controlRect)
+
+        # notification
+        notificationWidth = max(self.notification.sizeHint().width(), self.width() * .6)
+        notificationRect = QtCore.QRect(
+            (self.width() - notificationWidth) * .5, 20, 
+            notificationWidth, self.notification.sizeHint().height()
+        )
+        self.notification.setGeometry(notificationRect)
+
+    def paintEvent(self, event):
+        qp = QtGui.QPainter(self)
+        qp.fillRect(self.rect(), QtCore.Qt.black)

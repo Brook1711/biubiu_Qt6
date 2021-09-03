@@ -41,15 +41,20 @@ class Danmu(QLabel):
 
         self.text = "弹幕测试文字"
         self.setText(self.text)
+        
+        
+    def start_roll(self):
+        self.anim2.start()
+
+    def create_animation(self, DanmuData):
         self.anim2 = QPropertyAnimation(self,b'pos')
         self.anim2.setDuration(10000)
         self.anim2.setStartValue(QPoint(2000,50))
         self.anim2.setEndValue(QPoint(-50,50))
         self.anim2.setEasingCurve(QEasingCurve.Linear)
-        # self.setStyleSheet("background:transparent")
         self.anim2.finished.connect(self.anim_finished)
-        self.anim2.start()
-        
+        return 1
+
     def anim_finished(self):
         self.deleteLater()
     
