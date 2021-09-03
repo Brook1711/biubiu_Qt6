@@ -5,13 +5,13 @@ if sys.platform == "win32":
 import time
 import vlc
 from PySide6 import QtGui, QtCore
-from PySide6.QtCore import QPoint, Slot, Qt
+from PySide6.QtCore import QPoint, Slot, Qt, QPropertyAnimation, QEasingCurve
 from PySide6.QtGui import QAction, QPainter, QPainterPath, QPixmap,QFont
 
 from PySide6.QtWidgets import QLayout, QMainWindow, QApplication, QScrollArea, QSplitter, QTextBrowser, QWidget, QFrame, QSlider, QHBoxLayout, QPushButton, QVBoxLayout, QFileDialog, QGroupBox, QLabel, QScrollArea, QGridLayout
 
 from biubiuLib.SidebarLib import CommentArea, UserInfo, VideoInfo
-from biubiuLib.DanmuLib import Danmu, DanmuPool
+from biubiuLib.DanmuLib import Danmu, DanmuPool, DanmuZone
 
 class TextBrowser(QWidget):
 
@@ -38,7 +38,6 @@ class TextBrowser(QWidget):
         self.textBrowser.setStyleSheet("background:transparent;border-width:0;border-style:outset")
         self.textBrowser.setAutoFillBackground(False)
         self.textBrowser.setFixedHeight(200)
-        # self.textBrowser.set
 
 
 
@@ -65,17 +64,8 @@ class Player(QMainWindow):
         self.setCentralWidget(self.widget)
         self.video_zone = QFrame()
         self.videoframe = QFrame()
-        self.danmu_zone = TextBrowser(self.video_zone)
+        self.danmu_zone = DanmuZone(self.video_zone)
         self.videoframe.setParent(self.video_zone)
-        # self.danmu_zone.setParent()
-
-        # self.video_zone.text_view = QTextBrowser()
-        # In this widget, the video will be drawn
-        # if sys.platform == "darwin": # for MacOS
-        #     # self.videoframe = QtGui.QMacCocoaViewContainer(0)
-        #     self.videoframe = QFrame()
-        # else:
-        #     self.videoframe = QFrame()
         self.palette = self.videoframe.palette()
         self.palette.setColor (QtGui.QPalette.Window,
                                Qt.transparent)
@@ -229,10 +219,15 @@ class Player(QMainWindow):
         self.PlayPause()
         time.sleep(1)
         self.video_info.text2_widget.setText('视频音频情况：'+str([(i[0], i[1].decode()) for i in self.mediaplayer.audio_get_track_description()])+"\n可用字幕"+str([(i[0], i[1].decode()) for i in self.mediaplayer.video_get_spu_description()]))
+        danmu_test = QLabel("<h1>danmu</h1>")
+        danmu_test.setParent(self.danmu_zone)
+        anim2 = QPropertyAnimation(danmu_test,b'pos', self.danmu_zone)
+        anim2.setDuration(20000)
+        anim2.setStartValue(QPoint(1000,50))
+        anim2.setEndValue(QPoint(-50,50))
+        anim2.setEasingCurve(QEasingCurve.Linear)
         self.danmu_zone.show()
-        # value = int(7 / 101 * 256)
-        # color = str(hex(value))[2:] + '000000'
-        # self.danmu_zone.textBrowser.setStyleSheet('background-color:#%s' % color)
+        anim2.start()
         self.danmu_zone.setStyleSheet("background:transparent;border-width:0;border-style:outset")
 
 
@@ -271,3 +266,17 @@ class Player(QMainWindow):
                 # "Pause", not the desired behavior of a media player
                 # this will fix it
                 self.Stop()
+    def moveEvent(self, event: QtGui.QMoveEvent) -> None:
+        ## target danmu_zone position
+        videoPos = self.mapToGlobal(self.videoframe.pos())
+        self.danmu_zone.move(videoPos)
+        # print(videoPos)
+        return super().moveEvent(event)
+
+    def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
+        
+        ## target danmu_zone size
+        # print(self.video_zone.width(), self.video_zone.height())
+        self.videoframe.resize(self.video_zone.width(),self.video_zone.height())
+        self.danmu_zone.resize(self.video_zone.width(),self.video_zone.height())
+        return super().resizeEvent(event)

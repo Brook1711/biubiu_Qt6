@@ -7,7 +7,7 @@ import vlc
 from PySide6 import QtGui, QtCore
 from PySide6.QtCore import Slot, Qt, QPoint, QEasingCurve, QPropertyAnimation
 from PySide6.QtGui import QAction, QPainter, QPainterPath, QPixmap, QFont, QPalette, QColor
-from PySide6.QtWidgets import QLayout, QMainWindow, QApplication, QScrollArea, QSplitter, QWidget, QFrame, QSlider, QHBoxLayout, QPushButton, QVBoxLayout, QFileDialog, QGroupBox, QLabel, QScrollArea
+from PySide6.QtWidgets import QLayout, QMainWindow, QApplication, QScrollArea, QSplitter, QWidget, QFrame, QSlider, QHBoxLayout, QPushButton, QVBoxLayout, QFileDialog, QGroupBox, QLabel, QScrollArea, QGridLayout
 '''
 class Danmu(QLabel):
     font = QFont('SimHei',20,100)
@@ -36,8 +36,8 @@ class Danmu(QLabel):
 class Danmu(QLabel):
     font = QFont('SimHei',20,100)
     pe = QPalette()  
-    pe.setColor(QPalette.WindowText,Qt.white)
-    pe.setColor(QPalette.Window,Qt.red)
+    pe.setColor(QPalette.WindowText,Qt.black)
+    # pe.setColor(QPalette.Window,Qt.red)
     def __init__(self, parent=None):
         
         super(Danmu, self).__init__(parent)
@@ -51,6 +51,7 @@ class Danmu(QLabel):
         self.color = color
         self.setPalette(self.pe)
 
+        self.setText(self.text)
         self.anim2 = QPropertyAnimation(self,b'pos')
         self.anim2.setDuration(10000)
         self.anim2.setStartValue(QPoint(2000,self.posY))
@@ -64,3 +65,16 @@ class DanmuPool():
         danmu_test = Danmu(parent=parent)
         danmu_test.show()
         pass
+
+class DanmuZone(QWidget):
+    def __init__(self, parent=None) -> None:
+        super(DanmuZone, self).__init__(parent)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Tool)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+
+        # self.setFixedHeight(400)
+        # self.setFixedWidth(400)
+
+        layout = QGridLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)   # 设置页边距
+        layout.setSpacing(0)
