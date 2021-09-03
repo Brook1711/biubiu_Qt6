@@ -34,31 +34,25 @@ class Danmu(QLabel):
         self.anim2.start()
 '''
 class Danmu(QLabel):
-    font = QFont('SimHei',20,100)
-    pe = QPalette()  
-    pe.setColor(QPalette.WindowText,Qt.black)
-    # pe.setColor(QPalette.Window,Qt.red)
+
     def __init__(self, parent=None):
         
         super(Danmu, self).__init__(parent)
-        y=200
-        color=QColor(255,255,255)
+
         self.text = "弹幕测试文字"
-        self.parent = parent
-        self.setFont(self.font)
-
-        self.posY = y
-        self.color = color
-        self.setPalette(self.pe)
-
         self.setText(self.text)
         self.anim2 = QPropertyAnimation(self,b'pos')
         self.anim2.setDuration(10000)
-        self.anim2.setStartValue(QPoint(2000,self.posY))
-        self.anim2.setEndValue(QPoint(0,self.posY))
+        self.anim2.setStartValue(QPoint(2000,50))
+        self.anim2.setEndValue(QPoint(-50,50))
         self.anim2.setEasingCurve(QEasingCurve.Linear)
         # self.setStyleSheet("background:transparent")
+        self.anim2.finished.connect(self.anim_finished)
         self.anim2.start()
+        
+    def anim_finished(self):
+        self.deleteLater()
+    
 
 class DanmuPool():
     def __init__(self, parent, server={}) -> None:
@@ -71,9 +65,6 @@ class DanmuZone(QWidget):
         super(DanmuZone, self).__init__(parent)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Tool)
         self.setAttribute(Qt.WA_TranslucentBackground)
-
-        # self.setFixedHeight(400)
-        # self.setFixedWidth(400)
 
         layout = QGridLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)   # 设置页边距
